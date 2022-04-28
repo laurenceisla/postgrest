@@ -10,6 +10,8 @@ module PostgREST.RangeQuery (
 , restrictRange
 , rangeGeq
 , allRange
+, limitZeroRange
+, hasLimitZero
 , NonnegRange
 , rangeStatusHeader
 , contentRangeH
@@ -48,9 +50,9 @@ rangeRequested headers = maybe allRange rangeParse $ lookup hRange headers
 
 restrictRange :: Maybe Integer -> NonnegRange -> NonnegRange
 restrictRange Nothing r = r
-restrictRange (Just limit) r
-  | r == emptyRange = r
-  | otherwise = rangeIntersection r $ Range BoundaryBelowAll (BoundaryAbove $ rangeOffset r + limit - 1)
+restrictRange (Just limit) r =
+   rangeIntersection r $
+     Range BoundaryBelowAll (BoundaryAbove $ rangeOffset r + limit - 1)
 
 rangeLimit :: NonnegRange -> Maybe Integer
 rangeLimit range =
@@ -75,10 +77,19 @@ rangeLeq :: Integer -> NonnegRange
 rangeLeq n =
   Range BoundaryBelowAll (BoundaryAbove n)
 
+-- Special case to allow limit 0 queries
+-- https://github.com/PostgREST/postgrest/issues/1121
+-- 0 <= x <= -1
+limitZeroRange :: Range Integer
+limitZeroRange = Range (BoundaryBelow 0) (BoundaryAbove (-1))
+
+hasLimitZero :: Range Integer -> Bool
+hasLimitZero r = rangeUpper r == rangeUpper limitZeroRange
+
 rangeStatusHeader :: NonnegRange -> Int64 -> Maybe Int64 -> (Status, Header)
 rangeStatusHeader topLevelRange queryTotal tableTotal =
-  let lower = if topLevelRange /= emptyRange then rangeOffset topLevelRange else 0
-      upper = if topLevelRange /= emptyRange then lower + toInteger queryTotal - 1 else 0
+  let lower = rangeOffset topLevelRange
+      upper = lower + toInteger queryTotal - 1
       contentRange = contentRangeH lower upper (toInteger <$> tableTotal)
       status = rangeStatus lower upper (toInteger <$> tableTotal)
   in (status, contentRange)

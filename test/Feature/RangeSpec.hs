@@ -79,6 +79,11 @@ spec = do
             simpleStatus r `shouldBe` ok200
 
       context "of invalid range" $ do
+        it "fails with 416 for offside range" $
+          request methodPost  "/rpc/getitemrange"
+                  (rangeHdrs $ ByteRangeFromTo 1 0) emptyRange
+            `shouldRespondWith` 416
+
         it "refuses a range with nonzero start when there are no items" $
           request methodPost "/rpc/getitemrange"
                   (rangeHdrsWithCount $ ByteRangeFromTo 1 2) emptyRange
@@ -185,20 +190,6 @@ spec = do
 
       it "fails if limit is negative" $
         get "/items?select=id&limit=-1" `shouldRespondWith`
-          [json|{"message":"HTTP Range error"}|]
-          { matchStatus  = 416
-          , matchHeaders = [matchContentTypeJson]
-          }
-
-      it "fails if limit is negative in an embedded resource" $
-        get "/clients?select=id,projects(id,tasks(id))&order=id.asc&limit=1&projects.order=id.asc&projects.limit=-1&projects.tasks.order=id.asc&projects.tasks.limit=1" `shouldRespondWith`
-          [json|{"message":"HTTP Range error"}|]
-          { matchStatus  = 416
-          , matchHeaders = [matchContentTypeJson]
-          }
-
-      it "fails if limit is negative in an embedded resource at any level" $
-        get "/clients?select=id,projects(id,tasks(id))&order=id.asc&limit=1&projects.order=id.asc&projects.limit=2&projects.tasks.order=id.asc&projects.tasks.limit=-1" `shouldRespondWith`
           [json|{"message":"HTTP Range error"}|]
           { matchStatus  = 416
           , matchHeaders = [matchContentTypeJson]
@@ -346,6 +337,11 @@ spec = do
             simpleStatus r `shouldBe` ok200
 
       context "of invalid range" $ do
+        it "fails with 416 for offside range" $
+          request methodGet  "/items"
+                  (rangeHdrs $ ByteRangeFromTo 1 0) ""
+            `shouldRespondWith` 416
+
         it "refuses a range with nonzero start when there are no items" $
           request methodGet "/menagerie"
                   (rangeHdrsWithCount $ ByteRangeFromTo 1 2) ""
