@@ -56,9 +56,10 @@ import PostgREST.DbStructure.Proc        (ProcDescription (..),
 import PostgREST.Error                   (ApiRequestError (..))
 import PostgREST.Query.SqlFragment       (ftsOperators, operators)
 import PostgREST.RangeQuery              (NonnegRange, allRange,
-                                          hasLimitZero, limitZeroRange,
-                                          rangeGeq, rangeLimit,
-                                          rangeOffset, rangeRequested,
+                                          hasLimitZero,
+                                          limitZeroRange, rangeGeq,
+                                          rangeLimit, rangeOffset,
+                                          rangeRequested,
                                           restrictRange)
 import PostgREST.Request.Parsers         (pRequestColumns)
 import PostgREST.Request.Preferences     (PreferCount (..),
