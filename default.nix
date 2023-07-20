@@ -24,7 +24,7 @@ let
   # using `import` below.
   nixpkgs =
     builtins.fetchTarball {
-      url = "https://github.com/nixos/nixpkgs/archive/${nixpkgsVersion.rev}.tar.gz";
+      url = "https://github.com/laurenceisla/nixpkgs/archive/${nixpkgsVersion.rev}.tar.gz";
       sha256 = nixpkgsVersion.tarballHash;
     };
 
@@ -50,6 +50,7 @@ let
 
   postgresqlVersions =
     [
+      { name = "postgresql-16"; postgresql = pkgs.postgresql_16.withPackages (p: [ p.postgis p.pg_safeupdate ]); }
       { name = "postgresql-15"; postgresql = pkgs.postgresql_15.withPackages (p: [ p.postgis p.pg_safeupdate ]); }
       { name = "postgresql-14"; postgresql = pkgs.postgresql_14.withPackages (p: [ p.postgis p.pg_safeupdate ]); }
       { name = "postgresql-13"; postgresql = pkgs.postgresql_13.withPackages (p: [ p.postgis p.pg_safeupdate ]); }
