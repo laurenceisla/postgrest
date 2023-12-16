@@ -1,0 +1,8 @@
+_build
+Pipfile.lock
+*.aux
+*.log
+diagrams/db.pdf
+misspellings
+unuseddict
+.history
