@@ -1,14 +1,16 @@
-name: CI
+name: Documentation
 
 on:
   push:
     branches:
-    - main
-    - v*
+      - main
+      - rel-*
+    tags:
+      - "v[0-9]+.[0-9]+"
   pull_request:
     branches:
-    - main
-    - v*
+      - main
+      - rel-*
 
 jobs:
   build:
@@ -16,8 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v24
-    - run: nix-env -f default.nix -iA build
+    - name: Setup Nix Environment
+      uses: ./.github/actions/setup-nix
+      with:
+        tools: docs
+        cache-id: common
     - run: postgrest-docs-build
 
   spellcheck:
@@ -25,8 +30,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v24
-    - run: nix-env -f default.nix -iA spellcheck
+    - name: Setup Nix Environment
+      uses: ./.github/actions/setup-nix
+      with:
+        tools: docs
+        cache-id: common
     - run: postgrest-docs-spellcheck
 
   dictcheck:
@@ -34,8 +42,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v24
-      - run: nix-env -f default.nix -iA dictcheck
+      - name: Setup Nix Environment
+        uses: ./.github/actions/setup-nix
+        with:
+          tools: docs
+          cache-id: common
       - run: postgrest-docs-dictcheck
 
   linkcheck:
@@ -44,7 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: cachix/install-nix-action@v24
-    - run: nix-env -f default.nix -iA linkcheck
+    - name: Setup Nix Environment
+      uses: ./.github/actions/setup-nix
+      with:
+        tools: docs
+        cache-id: common
     - run: postgrest-docs-linkcheck
-    
