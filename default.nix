@@ -142,6 +142,10 @@ rec {
   devTools =
     pkgs.callPackage nix/tools/devTools.nix { inherit tests style devCabalOptions hsie withTools; };
 
+  # Documentation tools.
+  docs =
+    pkgs.callPackage nix/tools/docs.nix { };
+
   # Load testing tools.
   loadtest =
     pkgs.callPackage nix/tools/loadtest.nix { inherit withTools; };

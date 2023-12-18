@@ -16,6 +16,7 @@
 , args ? [ ]
 , positionalCompletion ? ""
 , inRootDir ? false
+, inDocsDir ? false
 , redirectTixFiles ? true
 , withEnv ? null
 , withPath ? [ ]
@@ -97,6 +98,10 @@ let
                      "run this command somewhere in the PostgREST repo."
             exit 1
           fi
+        ''
+
+        + lib.optionalString inDocsDir ''
+          cd "$(${git}/bin/git rev-parse --show-toplevel)/docs"
         ''
 
         + lib.optionalString withTmpDir ''
