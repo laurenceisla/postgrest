@@ -63,7 +63,7 @@ readPlanToQuery node@(Node ReadPlan{select,from=mainQi,fromAlias,where_=logicFor
     defSelect = [CoercibleSelectField (unknownField "*" []) Nothing Nothing Nothing Nothing]
     joins = getJoins node
     joinsSelects = getJoinSelects node
-    orderFrag = if relSpread == Just ToManySpread then mempty else orderF qi order
+    orderFrag = case relSpread of Just ToManySpread{} -> mempty; _ -> orderF qi order
 
 getJoinSelects :: ReadPlanTree -> [SQL.Snippet]
 getJoinSelects (Node ReadPlan{relSelect} _) =
@@ -107,11 +107,12 @@ getJoin fld node@(Node ReadPlan{order, relJoinType, relSpread} _) =
       JsonEmbed{rsEmbedMode = JsonObject} ->
         correlatedSubquery subquery aggAlias "TRUE"
       Spread{rsSpreadSel, rsAggAlias} ->
-        if relSpread == Just ToManySpread then
-          let selSpread = selectSubqAgg <> (if null rsSpreadSel then mempty else ", ") <> intercalateSnippet ", " (pgFmtSpreadJoinSelectItem rsAggAlias order <$> rsSpreadSel)
-          in correlatedSubquery (selSpread <> fromSubqAgg) aggAlias joinCondition
-        else
-          correlatedSubquery subquery aggAlias "TRUE"
+        case relSpread of
+          Just ToManySpread{} ->
+            let selSpread = selectSubqAgg <> (if null rsSpreadSel then mempty else ", ") <> intercalateSnippet ", " (pgFmtSpreadJoinSelectItem rsAggAlias order <$> rsSpreadSel)
+            in correlatedSubquery (selSpread <> fromSubqAgg) aggAlias joinCondition
+          _ ->
+            correlatedSubquery subquery aggAlias "TRUE"
       JsonEmbed{rsEmbedMode = JsonArray} ->
         correlatedSubquery (selectSubqAgg <> fromSubqAgg) aggAlias joinCondition
 

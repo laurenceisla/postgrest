@@ -429,7 +429,7 @@ expandStars ctx rPlanTree = Right $ expandStarsForReadPlan False rPlanTree
     expandStarsForReadPlan :: Bool -> ReadPlanTree -> ReadPlanTree
     expandStarsForReadPlan hasAgg (Node rp@ReadPlan{select, from=fromQI, fromAlias=alias, relSpread=spread} children) =
       let
-        newHasAgg = hasAgg || any (isJust . csAggFunction) select || spread == Just ToManySpread
+        newHasAgg = hasAgg || any (isJust . csAggFunction) select || case spread of Just ToManySpread{} -> True; _ -> False
         newCtx = adjustContext ctx fromQI alias
         newRPlan = expandStarsForTable newCtx newHasAgg rp
       in Node newRPlan (map (expandStarsForReadPlan newHasAgg) children)
@@ -485,7 +485,7 @@ addRels schema action allRels parentNode (Node rPlan@ReadPlan{relName,relHint,re
         newReadPlan = (\r ->
           let newAlias = Just (qiName (relForeignTable r) <> "_" <> show depth)
               aggAlias = qiName (relTable r) <> "_" <> fromMaybe relName relAlias <> "_" <> show depth
-              updSpread = if isJust relSpread && not (relIsToOne r) then Just ToManySpread else relSpread in
+              updSpread = if isJust relSpread && not (relIsToOne r) then Just $ ToManySpread [] [] else relSpread in
           case r of
             Relationship{relCardinality=M2M _} -> -- m2m does internal implicit joins that don't need aliasing
               rPlan{from=relForeignTable r, relToParent=Just r, relAggAlias=aggAlias, relJoinConds=getJoinConditions Nothing parentAlias r, relSpread=updSpread}
