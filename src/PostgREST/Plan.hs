@@ -330,6 +330,7 @@ readPlan qi@QualifiedIdentifier{..} AppConfig{configDbMaxRows, configDbAggregate
     mapLeft ApiRequestError $
     treeRestrictRange configDbMaxRows (iAction apiRequest) =<<
     hoistSpreadAggFunctions =<<
+    addToManySpreadOrderSelects =<<
     validateAggFunctions configDbAggregates =<<
     addRelSelects =<<
     addNullEmbedFilters =<<
@@ -747,6 +748,16 @@ hoistIntoRelSelectFields aggList r@(Spread {rsSpreadSel = spreadSelects, rsAggAl
                     ssSelAlias       = fldAlias }
             Nothing -> s
 hoistIntoRelSelectFields _ r = r
+
+addToManySpreadOrderSelects :: ReadPlanTree -> Either ApiRequestError ReadPlanTree
+addToManySpreadOrderSelects (Node rp@ReadPlan { order, relSpread = Just ToManySpread {} } forest) =
+  Node rp { order = [], relSpread = newRelSpread } <$> addToManySpreadOrderSelects `traverse` forest
+  where
+    newRelSpread = Just ToManySpread { stExtraSelect = addSprExtraSelects, stOrder = addSprOrder}
+    addSprExtraSelects = map (\o -> CoercibleSelectField{csField=coField o, csAlias=selOrdAlias (co o)}) order
+    addSprOrder =
+    selOrdAlias name = relAggAlias <> "_" <> name
+addToManySpreadOrderSelects (Node rp forest) = Node rp <$> addToManySpreadOrderSelects `traverse` forest
 
 validateAggFunctions :: Bool -> ReadPlanTree -> Either ApiRequestError ReadPlanTree
 validateAggFunctions aggFunctionsAllowed (Node rp@ReadPlan {select} forest)

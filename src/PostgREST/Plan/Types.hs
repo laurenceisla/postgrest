@@ -16,7 +16,7 @@ import PostgREST.ApiRequest.Types (AggregateFunction, Alias, Cast,
                                    Field, JsonPath, LogicOperator,
                                    OpExpr, OrderDirection, OrderNulls)
 
-import PostgREST.SchemaCache.Identifiers (FieldName)
+import PostgREST.SchemaCache.Identifiers (FieldName, QualifiedIdentifier)
 
 import Protolude
 
@@ -110,7 +110,7 @@ data SpreadSelectField =
 data SpreadType
   = ToOneSpread
   | ToManySpread
-      { sprExtraSelect :: [CoercibleSelectField]
-      , sprOrder       :: [CoercibleOrderTerm]
-      }
+    { stExtraSelect :: [(Maybe FieldName, CoercibleSelectField)]
+    , stOrder       :: [CoercibleOrderTerm]
+    }
   deriving (Eq, Show)
