@@ -1879,7 +1879,7 @@ def test_pgrst_log_503_client_error_to_stderr(defaultenv):
 def test_pgrst_log_503_no_schema_cache_startup_error_to_stderr(
     defaultenv, metapostgrest
 ):
-    "Should log the 503 error message when the schema cache is not loaded on startup"
+    "Should log the 503 error message when the schema cache is not loaded on startup and not reload the schema cache"
 
     env = {
         **defaultenv,
@@ -1892,11 +1892,17 @@ def test_pgrst_log_503_no_schema_cache_startup_error_to_stderr(
         response = postgrest.session.get("/projects")
         assert response.status_code == 503
 
-        output = postgrest.read_stdout(nlines=10)
+        output_start = postgrest.read_stdout(nlines=10)
 
-        log_message = '{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}'
+        log_err_message = '{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}'
 
-        assert any(log_message in line for line in output)
+        assert any(log_err_message in line for line in output_start)
+
+        output_schload = postgrest.read_stdout(nlines=10)
+
+        log_schload_message = 'Schema cache loaded in '
+
+        assert sum(log_schload_message in line for line in output_schload) == 1
 
 
 @pytest.mark.parametrize("level", ["crit", "error", "warn", "info", "debug"])
