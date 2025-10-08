@@ -1894,13 +1894,13 @@ def test_pgrst_log_503_no_schema_cache_startup_error_to_stderr(
 
         output_start = postgrest.read_stdout(nlines=10)
 
-        log_err_message = '{"code":"PGRST002","details":null,"hint":null,"message":"Could not query the database for the schema cache. Retrying."}'
+        log_err_message = '{"code":"PGRST002","details":null,"hint":"This usually happens when PostgREST is starting up. Try again later.","message":"Could not query the database for the schema cache. Retrying."}'
 
         assert any(log_err_message in line for line in output_start)
 
         output_schload = postgrest.read_stdout(nlines=10)
 
-        log_schload_message = 'Schema cache loaded in '
+        log_schload_message = "Schema cache loaded in "
 
         assert sum(log_schload_message in line for line in output_schload) == 1
 

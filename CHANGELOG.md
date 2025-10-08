@@ -18,6 +18,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Bounded JWT cache using the SIEVE algorithm by @mkleczek in #4084
   + It now uses a fixed size cache instead of arbitrary sized cache.
 - Add `--ready` flag for postgrest healthcheck by @taimoorzaeem in #4239
+- Add a hint to the `PGRST002` error by @laurenceisla in #4367
 
 ### Changed
 
