@@ -68,7 +68,7 @@ checkForErrors time audMatches = mconcat
   , claim "aud" AudClaimNotStringOrArray $ checkValue (not . validAud) JWTNotInAudience
   ]
   where
-      allowedSkewSeconds = 30 :: Int64
+      allowedSkewSeconds = 15 :: Int64
       sciToInt = fromMaybe 0 . Sci.toBoundedInteger
       toSec = floor . nominalDiffTimeToSeconds . utcTimeToPOSIXSeconds
       now = toSec time
